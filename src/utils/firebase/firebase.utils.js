@@ -1,23 +1,23 @@
 import {initializeApp} from 'firebase/app';
 import {
-    getAuth,
-    signInWithRedirect,
-    signInWithPopup,
-    GoogleAuthProvider,
     createUserWithEmailAndPassword,
+    getAuth,
+    GoogleAuthProvider,
+    onAuthStateChanged,
     signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
+    signInWithPopup,
+    signInWithRedirect,
+    signOut
 } from 'firebase/auth';
-import {getFirestore, doc, getDoc, setDoc} from 'firebase/firestore';
+import {collection, doc, getDoc, getDocs, getFirestore, query, setDoc, writeBatch} from 'firebase/firestore';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAyxPN109p4QTTE3OXiSu16irOg3hxHIhE",
-    authDomain: "clothing-shop-34072.firebaseapp.com",
-    projectId: "clothing-shop-34072",
-    storageBucket: "clothing-shop-34072.appspot.com",
-    messagingSenderId: "375024455724",
-    appId: "1:375024455724:web:ae128e3c811f37a462c189"
+    apiKey: "AIzaSyCYSg3walji7DGCUulZ7rXy4XyHfm95gEE",
+    authDomain: "clothing-shop-e29f1.firebaseapp.com",
+    projectId: "clothing-shop-e29f1",
+    storageBucket: "clothing-shop-e29f1.appspot.com",
+    messagingSenderId: "30273815220",
+    appId: "1:30273815220:web:5e4495fa56b547e5c24de1"
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
@@ -80,4 +80,26 @@ export const signInAuthUserWithEmailAndPassword = async (email, password) => {
 export const signOutUser = async () => await signOut(auth);
 
 export const onAuthStateChangedListener = (callback) => onAuthStateChanged(auth,callback);
+
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd)=>{
+    const collectionRef = collection(db,collectionKey);
+    const batch = writeBatch(db);
+    objectsToAdd.forEach((object)=>{
+        const docRef = doc(collectionRef,object.title.toLowerCase());
+        batch.set(docRef, object);
+    })
+    await batch.commit();
+}
+
+export const getCategoriesAndDocuments = async () => {
+    const collectionRef = collection(db,'products');
+    const q = query(collectionRef);
+    const snapShot = await getDocs(q);
+    return snapShot.docs.reduce((res, docSnapShot) => {
+        const {title, items} = docSnapShot.data();
+        res[title.toLowerCase()] = items;
+        return res;
+    }, {});
+}
+
 
